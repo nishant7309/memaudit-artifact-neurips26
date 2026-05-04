@@ -20,13 +20,13 @@ ROOT = Path(__file__).resolve().parents[1]
 FIG_DIR = ROOT / "figures"
 
 PALETTE = {
-    "oracle": "#2563EB",
+    "oracle": "#0F766E",
     "opt": "#0F172A",
     "full_raw": "#F97316",
-    "density": "#F59E0B",
+    "density": "#EF4444",
     "no_tombstone": "#E11D48",
     "fact": "#10B981",
-    "summary": "#8B5CF6",
+    "summary": "#7C3AED",
     "recency": "#64748B",
     "fifo": "#64748B",
     "light": "#FFF7ED",
@@ -40,6 +40,16 @@ PALETTE = {
     "ink": "#111827",
     "muted": "#6B5F53",
     "success": "#22C55E",
+}
+
+SYSTEM_COLORS = {
+    "gvt": "#0F766E",
+    "estimated": "#7C3AED",
+    "letta": "#059669",
+    "mem0": "#F97316",
+    "amem": "#475569",
+    "selected": "#14B8A6",
+    "upper": "#FB7185",
 }
 
 HEATMAP = LinearSegmentedColormap.from_list(
@@ -125,6 +135,39 @@ def add_box(ax, xy, w, h, text, color, fontsize=9):
     ax.text(xy[0] + w / 2, xy[1] + h / 2, text, ha="center", va="center", fontsize=fontsize)
 
 
+def add_labeled_box(ax, xy, w, h, title, subtitle, color, title_size=12.0, subtitle_size=8.8):
+    box = FancyBboxPatch(
+        xy,
+        w,
+        h,
+        boxstyle="round,pad=0.035,rounding_size=0.08",
+        linewidth=1.5,
+        edgecolor=color,
+        facecolor=color,
+        alpha=0.13,
+    )
+    ax.add_patch(box)
+    ax.text(
+        xy[0] + w / 2,
+        xy[1] + h * 0.62,
+        title,
+        ha="center",
+        va="center",
+        fontsize=title_size,
+        fontweight="bold",
+        color=PALETTE["ink"],
+    )
+    ax.text(
+        xy[0] + w / 2,
+        xy[1] + h * 0.31,
+        subtitle,
+        ha="center",
+        va="center",
+        fontsize=subtitle_size,
+        color=PALETTE["muted"],
+    )
+
+
 def arrow(ax, p1, p2, color=None):
     color = color or PALETTE["ink"]
     ax.add_patch(FancyArrowPatch(p1, p2, arrowstyle="->", mutation_scale=12, lw=1.2, color=color))
@@ -177,6 +220,163 @@ def pipeline_schematic():
         color=PALETTE["muted"],
     )
     save(fig, "pipeline_schematic")
+
+
+def memaudit_write_time_evaluation():
+    """Main-text Figure 1 with readable labels at paper scale."""
+
+    fig, ax = plt.subplots(figsize=(11.6, 5.1))
+    ax.set_xlim(0, 11.6)
+    ax.set_ylim(0, 5.1)
+    ax.axis("off")
+    ax.set_facecolor("#FFF8F0")
+
+    ax.add_patch(
+        FancyBboxPatch(
+            (0.18, 4.34),
+            11.24,
+            0.48,
+            boxstyle="round,pad=0.03,rounding_size=0.08",
+            facecolor="#FEF3C7",
+            edgecolor="#FDBA74",
+            linewidth=1.0,
+            alpha=0.95,
+        )
+    )
+    ax.text(
+        5.8,
+        4.58,
+        "FROZEN PACKAGE SPECIFICATION: candidates + costs + coverage + weights + groups",
+        ha="center",
+        va="center",
+        fontsize=14.2,
+        fontweight="bold",
+        color="#7C2D12",
+    )
+
+    ax.text(0.42, 3.92, "DATA / INFORMATION FLOW", fontsize=14.5, fontweight="bold", color=PALETTE["ink"])
+    ax.text(7.72, 3.92, "EVALUATION FLOW", fontsize=14.5, fontweight="bold", color=PALETTE["ink"])
+
+    y = 2.76
+    add_labeled_box(
+        ax,
+        (0.38, y),
+        1.70,
+        0.82,
+        "Experiences",
+        "multi-session events",
+        "#64748B",
+        title_size=12.8,
+        subtitle_size=9.2,
+    )
+    add_labeled_box(
+        ax,
+        (2.62, y),
+        2.00,
+        0.82,
+        "Candidates",
+        "raw, fact, summary,\ntombstone, update",
+        "#C026D3",
+        title_size=12.8,
+        subtitle_size=8.6,
+    )
+    add_labeled_box(
+        ax,
+        (5.08, y),
+        1.78,
+        0.82,
+        "Writer",
+        "selects persistent writes",
+        SYSTEM_COLORS["gvt"],
+        title_size=12.8,
+        subtitle_size=9.2,
+    )
+    add_labeled_box(
+        ax,
+        (7.34, y),
+        1.55,
+        0.82,
+        "Store X",
+        "written memory",
+        SYSTEM_COLORS["selected"],
+        title_size=13.0,
+        subtitle_size=9.2,
+    )
+
+    for start, end in [((2.12, y + 0.41), (2.58, y + 0.41)), ((4.66, y + 0.41), (5.04, y + 0.41)), ((6.90, y + 0.41), (7.30, y + 0.41))]:
+        arrow(ax, start, end, PALETTE["ink"])
+
+    add_labeled_box(
+        ax,
+        (9.42, 3.08),
+        1.78,
+        0.72,
+        "MemAudit score",
+        r"$F(X)/\mathrm{OPT}_{\mathcal{P}}(B)$",
+        PALETTE["opt"],
+        title_size=12.6,
+        subtitle_size=9.8,
+    )
+    add_labeled_box(
+        ax,
+        (9.42, 2.08),
+        1.78,
+        0.72,
+        "Retriever\n+ reader",
+        "optional downstream QA",
+        "#059669",
+        title_size=11.4,
+        subtitle_size=8.8,
+    )
+    add_labeled_box(
+        ax,
+        (9.42, 1.08),
+        1.78,
+        0.72,
+        "Answer metrics",
+        "EM, F1, abstention",
+        "#059669",
+        title_size=12.0,
+        subtitle_size=8.8,
+    )
+    arrow(ax, (8.92, y + 0.55), (9.38, 3.44), PALETTE["opt"])
+    arrow(ax, (8.92, y + 0.26), (9.38, 2.44), "#059669")
+    arrow(ax, (10.31, 2.05), (10.31, 1.84), "#059669")
+
+    ax.add_patch(
+        FancyBboxPatch(
+            (0.42, 1.12),
+            7.92,
+            0.80,
+            boxstyle="round,pad=0.04,rounding_size=0.08",
+            facecolor="#ECFEFF",
+            edgecolor="#5EEAD4",
+            linewidth=1.0,
+            alpha=0.85,
+        )
+    )
+    ax.text(
+        4.38,
+        1.52,
+        "MemAudit isolates write-time memory quality before\nretrieval and reader reasoning obscure the failure source.",
+        ha="center",
+        va="center",
+        fontsize=10.8,
+        color=PALETTE["ink"],
+    )
+
+    ax.text(
+        5.94,
+        2.42,
+        "budget B + one representation per experience",
+        ha="center",
+        va="center",
+        fontsize=9.2,
+        color=PALETTE["muted"],
+    )
+    fig.savefig(FIG_DIR / "memaudit_write_time_evaluation.png", dpi=240, bbox_inches="tight", pad_inches=0.04)
+    fig.savefig(FIG_DIR / "memaudit_write_time_evaluation.svg", bbox_inches="tight", pad_inches=0.04)
+    plt.close(fig)
 
 
 def tombstone_timeline():
@@ -416,14 +616,14 @@ def system_diagnostic():
         (
             "MemAudit-GVT\n(package)",
             [_mean_ratio_by_method(natural["by_budget_method"], "oracle_gvt", b, "mean_ratio_to_opt") for b in budgets],
-            PALETTE["oracle"],
+            SYSTEM_COLORS["gvt"],
             "o",
             "-",
         ),
         (
             "Estimated-GVT\n(package)",
             [_mean_ratio_by_method(natural["by_budget_method"], "estimated_gvt", b, "mean_ratio_to_opt") for b in budgets],
-            PALETTE["summary"],
+            SYSTEM_COLORS["estimated"],
             "P",
             "-",
         ),
@@ -435,7 +635,7 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["letta"],
+            SYSTEM_COLORS["letta"],
             "s",
             "-",
         ),
@@ -447,7 +647,7 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["letta"],
+            SYSTEM_COLORS["letta"],
             "s",
             "--",
         ),
@@ -459,7 +659,7 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["mem0"],
+            SYSTEM_COLORS["mem0"],
             "^",
             "-",
         ),
@@ -471,7 +671,7 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["mem0"],
+            SYSTEM_COLORS["mem0"],
             "^",
             "--",
         ),
@@ -483,7 +683,7 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["amem"],
+            SYSTEM_COLORS["amem"],
             "D",
             "-",
         ),
@@ -495,13 +695,13 @@ def system_diagnostic():
                 )
                 for b in budgets
             ],
-            PALETTE["amem"],
+            SYSTEM_COLORS["amem"],
             "x",
             ":",
         ),
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.35), gridspec_kw={"width_ratios": [1.62, 1.0]})
+    fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.45), gridspec_kw={"width_ratios": [1.70, 1.0]})
     ax = axes[0]
     for label, ys, color, marker, linestyle in series:
         ax.plot(
@@ -516,14 +716,14 @@ def system_diagnostic():
             alpha=0.95,
         )
     endpoint_offsets = {
-        "MemAudit-GVT\n(package)": 0.000,
-        "Mem0 upper\n(union)": 0.045,
-        "Estimated-GVT\n(package)": -0.045,
-        "Letta upper\n(union)": 0.022,
-        "Letta salience\n(union)": -0.020,
-        "Mem0 salience\n(union)": 0.000,
-        "A-Mem metadata\n(union)": 0.018,
-        "A-Mem full store\n(union)": 0.026,
+        "MemAudit-GVT\n(package)": 0.020,
+        "Mem0 upper\n(union)": 0.055,
+        "Estimated-GVT\n(package)": -0.060,
+        "Letta upper\n(union)": 0.030,
+        "Letta salience\n(union)": -0.030,
+        "Mem0 salience\n(union)": -0.010,
+        "A-Mem metadata\n(union)": 0.030,
+        "A-Mem full store\n(union)": 0.030,
     }
     endpoint_labels = {
         "MemAudit-GVT\n(package)": "GVT",
@@ -538,20 +738,20 @@ def system_diagnostic():
     for label, ys, color, _, linestyle in series:
         label_text = endpoint_labels[label]
         ax.text(
-            104.0,
+            102.0,
             max(0.0, min(1.03, ys[-1] + endpoint_offsets.get(label, 0.0))),
             label_text,
             color=color,
-            fontsize=7,
+            fontsize=7.1,
             va="center",
-            bbox=dict(boxstyle="round,pad=0.15", facecolor="white", edgecolor="none", alpha=0.82),
-            clip_on=False,
+            bbox=dict(boxstyle="round,pad=0.18", facecolor=PALETTE["paper"], edgecolor=color, linewidth=0.45, alpha=0.96),
+            clip_on=True,
         )
     ax.set_title("Exported stores under the same budget")
     ax.set_xlabel("Storage budget B")
     ax.set_ylabel("Ratio to exact package/union OPT")
     ax.set_ylim(-0.03, 1.05)
-    ax.set_xlim(28, 126)
+    ax.set_xlim(28, 121)
     ax.set_xticks(budgets)
     style_axes(ax)
 
@@ -569,20 +769,41 @@ def system_diagnostic():
         _mean_ratio_by_method(amem["by_method_budget"], "actual_amem_full_oracle_pruned_upper", 100, "mean_ratio_to_union_opt"),
     ]
     labels = ["Mem0", "Letta", "A-Mem\nmetadata", "A-Mem\nfull"]
-    x = list(range(len(labels)))
-    width = 0.34
-    ax.bar([i - width / 2 for i in x], selected, width, label="Selected/pruned", color=PALETTE["oracle"], alpha=0.92)
-    ax.bar([i + width / 2 for i in x], upper, width, label="Upper bound", color=PALETTE["density"], alpha=0.92)
+    y = list(range(len(labels)))
+    height = 0.30
+    selected_y = [i + height * 0.60 for i in y]
+    upper_y = [i - height * 0.60 for i in y]
+    ax.barh(selected_y, selected, height, label="Selected/pruned", color=SYSTEM_COLORS["selected"], alpha=0.94)
+    ax.barh(upper_y, upper, height, label="Upper bound", color=SYSTEM_COLORS["upper"], alpha=0.94)
     for i, (sel, up) in enumerate(zip(selected, upper)):
-        ax.text(i - width / 2, sel + 0.025, f"{sel:.2f}", ha="center", va="bottom", fontsize=7)
-        ax.text(i + width / 2, up + 0.025, f"{up:.2f}", ha="center", va="bottom", fontsize=7)
+        ax.text(
+            min(sel + 0.025, 1.02),
+            selected_y[i],
+            f"{sel:.2f}",
+            ha="left",
+            va="center",
+            fontsize=7.5,
+            color=SYSTEM_COLORS["selected"],
+            bbox=dict(boxstyle="round,pad=0.10", facecolor=PALETTE["paper"], edgecolor="none", alpha=0.90),
+        )
+        ax.text(
+            min(up + 0.025, 1.02),
+            upper_y[i],
+            f"{up:.2f}",
+            ha="left",
+            va="center",
+            fontsize=7.5,
+            color=SYSTEM_COLORS["upper"],
+            bbox=dict(boxstyle="round,pad=0.10", facecolor=PALETTE["paper"], edgecolor="none", alpha=0.90),
+        )
     ax.set_title("B=100: extraction vs selection")
-    ax.set_ylabel("Union ratio")
-    ax.set_xticks(x, labels)
-    ax.set_ylim(0, 1.02)
+    ax.set_xlabel("Union ratio")
+    ax.set_yticks(y, labels)
+    ax.set_xlim(0, 1.08)
+    ax.set_ylim(max(y) + 0.65, min(y) - 0.65)
     style_axes(ax)
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2)
-    fig.subplots_adjust(bottom=0.24, wspace=0.40)
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=1)
+    fig.subplots_adjust(bottom=0.25, wspace=0.38)
     save(fig, "system_diagnostic")
 
 
@@ -648,6 +869,7 @@ def main():
     ]
     outputs = [
         "pipeline_schematic",
+        "memaudit_write_time_evaluation",
         "tombstone_timeline",
         "exact_budget_sweep",
         "stress_heatmap",
@@ -664,11 +886,16 @@ def main():
             print(f"  {item}")
         print("Outputs:")
         for item in outputs:
-            print(f"  figures/{item}.pdf")
-            print(f"  figures/{item}.svg")
+            if item == "memaudit_write_time_evaluation":
+                print(f"  figures/{item}.png (external AI-generated schematic; preserved)")
+            else:
+                print(f"  figures/{item}.pdf")
+                print(f"  figures/{item}.svg")
         return
 
     pipeline_schematic()
+    # Figure 1 is an externally generated schematic. Keep it stable rather than
+    # overwriting it whenever the numeric figures are rebuilt.
     tombstone_timeline()
     exact_budget_sweep()
     stress_heatmap_and_gap()
@@ -677,7 +904,7 @@ def main():
     longmemeval_diagnostics()
     system_diagnostic()
     conditional_failure_audit()
-    print(f"Wrote {len(outputs) * 2} vector figures to {FIG_DIR}")
+    print(f"Wrote figure files to {FIG_DIR}")
 
 
 if __name__ == "__main__":

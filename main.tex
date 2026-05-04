@@ -46,7 +46,7 @@
 \newcommand{\R}{\mathbb{R}}
 
 \title{\method:\\
-An Exact-Oracle Evaluation Protocol\\
+An Exact Package-Oracle Evaluation Protocol\\
 for Budgeted Long-Term LLM Memory Writing}
 
 \author{Anonymous}
@@ -56,26 +56,26 @@ for Budgeted Long-Term LLM Memory Writing}
 \maketitle
 
 \begin{abstract}
-Long-term LLM agents must decide what to write into persistent memory before future queries are known, but existing evaluations conflate memory writing, retrieval, and reader reasoning. We introduce \method, a reusable exact-oracle evaluation protocol for budgeted memory writing. A package contains an experience stream, candidate memory representations, storage costs, semantic evidence units, and future-query requirements; together these turn long-term memory writing into an auditable finite optimization problem with a certified denominator. We instantiate a standard concave-over-modular semantic coverage objective under a storage budget and a one-representation-per-experience constraint, then compute package optima with branch-and-bound/MILP. Across controlled, validity-heavy, human-validated natural support-sliced, and exported-system packages, \method\ exposes representation, validity, and budget-selection effects that end-to-end QA alone cannot localize. Exported Mem0, A-Mem, and Letta stores show that heterogeneous memory systems can be scored without forcing a shared internal representation. \method\ provides a reusable evaluation layer for measuring what memory writers preserve under a fixed budget.
+Long-term LLM agents must compress streams of past interactions into persistent memory before future queries are known. Existing evaluations usually measure final question-answering accuracy, which entangles memory writing with retrieval, prompting, and reader reasoning. We introduce \method, an exact package-oracle evaluation protocol for budgeted long-term memory writing. A \method\ package fixes an experience stream, candidate memory representations, storage costs, semantic evidence units, future-query requirements, and a budget, turning write-time memory selection into a finite auditable optimization problem with a certified denominator. We instantiate this protocol with a concave-over-modular semantic coverage objective under storage and one-representation-per-experience constraints, and compute exact package optima using branch-and-bound with MILP certification. Across controlled exact packages, validity-heavy stress tests, human-audited natural support slices, and exported Mem0, A-Mem, and Letta stores, \method\ separates representation quality, validity-state preservation, and budget-aware selection effects that end-to-end QA cannot localize. The resulting artifact provides reusable package generators, certified solvers, natural package exports, external-system scorers, and cached reproducibility metadata for evaluating what memory writers actually preserve under fixed storage budgets.
 \end{abstract}
 
 \section{Introduction}
 
 LLM agents increasingly operate across sessions: they converse with users, call tools, edit code, inspect documents, and later need to reuse what happened. A fixed context window makes the naive policy of retaining everything impossible. The agent must compile an experience stream into persistent memory, choosing not only whether to store an item but also which representation should survive: raw span, extracted fact, temporal event, graph edge, summary, rule, skill, compound update, or tombstone.
 
-This paper argues that long-term memory writing should be evaluated as finite semantic compression, not only as an architecture choice. The load-bearing object is an oracle package: for a fixed budget, finite candidate memories, and fixed future-query requirements, how close is a writer to the best package-feasible store? This separates write quality from downstream retrieval and reader behavior. A system may fail because it wrote the wrong memory, because retrieval missed a good memory, or because the reader ignored evidence; final QA accuracy alone cannot identify which layer failed.
+This paper argues that long-term memory writing should be evaluated as finite semantic compression, not only as an architecture choice. The load-bearing object is a package with an exact package oracle: for a fixed budget, finite candidate memories, and fixed future-query requirements, how close is a writer to the best package-feasible store? This separates write quality from downstream retrieval and reader behavior. A system may fail because it wrote the wrong memory, because retrieval missed a good memory, or because the reader ignored evidence; final QA accuracy alone cannot identify which layer failed.
 
 The distinction matters because most deployed memory systems are evaluated only after several other choices have intervened. A memory writer may extract a useful fact but store it in a form too expensive to keep under the target budget. A retriever may miss the relevant memory even if the writer preserved it. A reader may see the evidence and still answer incorrectly. These are different engineering failures. \method\ isolates the first one by freezing a finite candidate set, a storage accounting rule, and an evidence-unit objective. The resulting denominator is not a claim about all possible memories; it is a reproducible answer to the narrower question ``given this package, how much of the package-feasible semantic value did the writer preserve?''
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.88\linewidth]{figures/memaudit_write_time_evaluation.png}
+\includegraphics[width=\linewidth,trim=0 34 0 34,clip]{figures/memaudit_write_time_evaluation.png}
 \caption{\method\ evaluates the written memory store before retrieval and reader reasoning. The frozen package defines the exact write-time denominator, while downstream QA is measured separately through the optional retriever/reader branch.}
 \label{fig:pipeline}
 \end{figure}
 
 \paragraph{Contributions.}
-We make four evaluation-and-dataset contributions. (i) We define a finite \method\ package for budgeted memory writing with a package oracle ratio and a union denominator for external stores. (ii) We instantiate the known concave-over-modular submodular coverage structure for semantic memory preservation. (iii) We provide exact/certified package optima and an oracle reference baseline, with an independent MILP audit. (iv) We release an initial \method\ suite spanning controlled exact packages, validity-heavy stress packages, human-validated model-adjudicated natural support slices with reported inter-annotator agreement, and exported-system packages for Mem0, A-Mem, and Letta.
+We make four evaluation-and-dataset contributions. (i) We define a finite \method\ package for budgeted memory writing with a package-oracle ratio and a union denominator for external stores. (ii) We instantiate the known concave-over-modular submodular coverage structure for semantic memory preservation. (iii) We provide exact/certified package optima and a package-oracle reference baseline, with an independent MILP audit. (iv) We release an initial \method\ suite spanning controlled exact packages, validity-heavy stress packages, human-validated model-adjudicated natural support slices with reported inter-annotator agreement, and exported-system packages for Mem0, A-Mem, and Letta.
 
 \paragraph{E\&D artifact role.}
 \method\ is designed to complement systems such as Mem0, Letta, A-Mem, MemGPT-style archival memory, and graph-based memories by scoring their exported writes under a shared denominator. The released artifact contains deterministic exact-package generators, certified solvers, cached natural package exports, adjudication summaries, exported Mem0/A-Mem/Letta memory stores, and scripts to reproduce the main tables and figures without additional API calls. API-backed construction is needed only to regenerate natural annotations or rerun external memory exports.
@@ -164,7 +164,7 @@ B\&B vs MILP & $1{,}200$ & $1{,}200/1{,}200$ & $0.0$ \\
 \end{tabular}
 \end{table}
 
-The oracle reference baseline is grouped value-threshold (\compiler). For each arriving experience, \compiler\ forms the budget-feasible candidates whose oracle marginal density exceeds a threshold, then inserts the admissible representation with largest raw marginal value. A threshold grid gives a conservative insertion-only constant-factor guarantee under exact marginals and small-item assumptions; the theorem and proof are in \Cref{app:proofs}. \compiler\ is included as a calibration baseline: because it has access to exact package marginals, it helps verify that the package and solver behave sensibly. It is not the proposed deployed writer.
+The package-oracle reference baseline is grouped value-threshold (\compiler). For each arriving experience, \compiler\ forms the budget-feasible candidates whose package-oracle marginal density exceeds a threshold, then inserts the admissible representation with largest raw marginal value. A threshold grid gives a conservative insertion-only constant-factor guarantee under exact marginals and small-item assumptions; the theorem and proof are in \Cref{app:proofs}. \compiler\ is included as a calibration baseline: because it has access to exact package marginals, it helps verify that the package and solver behave sensibly. It is not the proposed deployed writer.
 
 Density-only representation choice is included as a negative control. It can be arbitrarily bad even for modular utility: a tiny candidate can have higher density while losing nearly all value. Controlled experiments below show this failure empirically.
 
@@ -174,12 +174,12 @@ This calibration role is useful because it makes representation-choice effects v
 For every $\eta>0$, there is a one-experience modular instance satisfying $0<c_u\leq\budget/2$ in which a max-density representation rule obtains at most $\eta$ times the finite package optimum.
 \end{proposition}
 
-\begin{theorem}[Scoped oracle-\compiler\ guarantee]\label{thm:gvt}
-Let $F$ be normalized, monotone, and submodular on $\ground$. Suppose candidates arrive group-by-group, the algorithm is insertion-only, computes exact oracle marginals, enforces \Cref{eq:feasible}, and chooses the maximum raw marginal among threshold-admissible candidates in each arriving group. If every non-discard representation has cost $0<c_u\leq\budget/2$ and the threshold grid contains
+\begin{theorem}[Scoped package-oracle \compiler\ guarantee]\label{thm:gvt}
+Let $F$ be normalized, monotone, and submodular on $\ground$. Suppose candidates arrive group-by-group, the algorithm is insertion-only, computes exact package-oracle marginals, enforces \Cref{eq:feasible}, and chooses the maximum raw marginal among threshold-admissible candidates in each arriving group. If every non-discard representation has cost $0<c_u\leq\budget/2$ and the threshold grid contains
 \[
 \lambda\in\left[(1-\varepsilon)\frac{\opt}{2\budget},\,\frac{\opt}{2\budget}\right],
 \]
-then the best grid solution satisfies $F(X)\geq(1-\varepsilon)\opt/4$. This is a calibration result for the oracle baseline; deployed writers without exact marginals are evaluated empirically.
+then the best grid solution satisfies $F(X)\geq(1-\varepsilon)\opt/4$. This is a calibration result for the package-oracle baseline; deployed writers without exact marginals are evaluated empirically.
 \end{theorem}
 
 \section{Controlled Exact-OPT Packages}\label{sec:controlled}
@@ -230,7 +230,7 @@ The three headline distributions cover different validity pressures. The base di
 
 Natural packages demonstrate that the same finite-package schema can be populated from realistic conversation support slices. We built a 200-example LongMemEval-style support-slice package with Gemini Flash-Lite through OpenRouter. Candidate generation sees answer-support sessions; query and gold-answer fields are used only in the separate benchmark-labeling pass that maps evidence units to query requirements. The package is support-sliced, not full-haystack LongMemEval, and the labels are source-backed model-adjudicated labels with explicit rejection and audit paths.
 
-The natural construction route is intentionally auditable. The pipeline separates three artifacts: candidate memories, evidence units, and query requirements. Candidate memories are generated from support sessions. Evidence units are grounded in the same source text. Query requirements are assigned in a separate labeling pass. This separation reduces direct answer leakage into the writer while still allowing exact package scoring after the artifact is frozen.
+The natural construction route is intentionally auditable. The pipeline separates three artifacts: candidate memories, evidence units, and query requirements. Candidate memories are generated from support sessions. Evidence units are grounded in the same source text. Query requirements are assigned in a separate labeling pass. This separation reduces direct answer leakage into the writer while still allowing exact package scoring after the artifact is frozen. The resulting Natural-87 subset is deliberately modest: it is small, support-sliced, excludes 13 ambiguous examples from the stricter 100-example adjudication pass, and still depends on model-adjudicated evidence-unit construction. We therefore use it as a first audited natural package and exported-system diagnostic, not as a final full-haystack long-memory benchmark.
 
 \begin{table}[h]
 \centering
@@ -255,7 +255,7 @@ Human-edited seed set & $100$ ex. & $100$ schema-valid & -- & prompt/schema deve
 \end{tabular}
 \end{table}
 
-\Cref{tab:reliability} is intentionally conservative. The primary Natural-200 export used 681 API calls, 1{,}978{,}327 tokens, and about \$0.907. An initial secondary audit surfaced ambiguous required-unit cases, motivating a stricter Gemini-Flash adjudication pass on 100 examples; it accepted or corrected 87 examples and flagged 13 ambiguous examples. The independent 30-example spot-check accepted/corrected 29 examples. This is an advantage of the package format: ambiguous evidence requirements become measurable dataset objects rather than hidden benchmark noise.
+\Cref{tab:reliability} is intentionally conservative. The primary Natural-200 export used 681 API calls, 1{,}978{,}327 tokens, and about \$0.907. An initial secondary audit surfaced ambiguous required-unit cases, motivating a stricter Gemini-Flash adjudication pass on 100 examples; it accepted or corrected 87 examples and rejected 13 for unresolved ambiguity. The independent 30-example spot-check accepted/corrected 29 examples. Rejections mostly involved underspecified query requirements, support spans that licensed multiple plausible evidence decompositions, or candidate memories whose coverage depended on borderline summary entailment. This is an advantage of the package format: ambiguous evidence requirements become measurable dataset objects rather than hidden benchmark noise.
 
 \begin{table}[t]
 \centering
@@ -285,43 +285,58 @@ Sonnet--human & blind cell pass & $0.484$ & $0.739$ & -- & -- \\
 
 The coverage audit in \Cref{tab:coverage-audit} is part of the artifact, not a side note. On the 87-example adjudicated subset, two human annotators labeled all nonzero coverage cells plus a stratified 20\% sample of model-zero cells. Human agreement is substantial, Gemini agrees closely with the human-consensus subset, and re-scoring package writers with human labels changes ratios by only $0.035$ on average while preserving rankings. All natural-package rows have bootstrap intervals in the artifact; for example, Estimated-GVT at $B=100$ is $0.829$ $[0.761,0.887]$ under Gemini labels and $0.828$ $[0.755,0.893]$ under human-consensus labels. The Sonnet rows are useful as a stress test: rankings remain stable, but binary labels are not interchangeable with the human-validated Gemini labels.
 
-The next question is whether the same package machinery can score memory systems that write in very different forms. The union denominator makes this possible: exported memories are added as candidates with measured costs and adjudicated coverage rows, so the score can distinguish extraction quality from budget-aware selection. We therefore evaluate Mem0, Letta, and A-Mem exports on the same 87-example adjudicated subset before discussing the specific failure modes.
+The next question is whether the same package machinery can score memory systems that write in very different forms. The union denominator makes this possible: exported memories are added as candidates with measured costs and adjudicated coverage rows, so the score can distinguish extraction quality from budget-aware selection. These exported-system scores are post-hoc budget-pruned diagnostics over written memories, not claims that Mem0, Letta, or A-Mem were natively deployed with our package budget or objective.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.96\linewidth]{figures/system_diagnostic.pdf}
-\caption{Actual-system diagnostic on the 87-example adjudicated subset. Left: package or union ratio across budgets for oracle \method-\compiler, non-oracle Estimated-GVT, and exported Mem0/Letta/A-Mem stores. Right: at $B=100$, upper-pruned rows isolate extraction potential, while selected/pruned rows show the budget-aware selection actually achieved by each exported store.}
+\caption{Actual-system diagnostic on the 87-example adjudicated subset. Left: package or union ratio across budgets for package-oracle \method-\compiler, non-oracle Estimated-GVT, and exported Mem0/Letta/A-Mem stores. Right: at $B=100$, upper-pruned rows isolate extraction potential, while selected/pruned rows show the budget-aware selection actually achieved by each exported store.}
 \label{fig:systems}
 \end{figure}
 
-\Cref{fig:systems} shows that \method\ can diagnose heterogeneous memory systems without requiring a common internal representation. The non-oracle Estimated-GVT line is the more realistic package writer: it uses estimated values rather than hidden oracle marginals and reaches $0.53,0.68,0.83$ of package OPT across $B=30,60,100$. Letta's core+archival exports achieve the strongest salience-pruned union ratios on the adjudicated subset, indicating that passage-style archival memories can be effective under this budgeted evidence objective. Mem0's high upper-pruned bound shows that useful evidence is often extracted, while the gap to recency/salience pruning isolates budget-aware selection as the bottleneck. A-Mem illustrates a complementary behavior: rich notes preserve evidence, but their serialized size makes them poorly matched to strict small-budget stores unless paired with compaction or admission control.
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{External-system denominator comparison at $B=100$ on Natural-87. $F(Y)$ is the raw mean coverage value of the post-hoc pruned exported store. The package ratio uses the original package-candidate denominator; the union ratio uses the expanded denominator after adding the system's own exported memories.}
+\label{tab:external-denominators}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Exported diagnostic row & Raw $F(Y)$ & Package ratio & Union ratio \\
+\midrule
+Mem0 salience-pruned & $0.655$ & $0.489$ & $0.427$ \\
+Mem0 upper-pruned & $1.443$ & $1.041$ & $0.886$ \\
+Letta salience-pruned & $1.270$ & $0.881$ & $0.734$ \\
+Letta upper-pruned & $1.322$ & $0.918$ & $0.765$ \\
+A-Mem metadata view & $0.282$ & $0.218$ & $0.180$ \\
+A-Mem full-store view & $0.000$ & $0.000$ & $0.000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-This experiment also illustrates why the union denominator matters. If we scored exported memories only against the original package candidates, a system-specific representation could be unfairly undervalued. If we scored only the system's own memories without an optimum, we could not tell whether the problem was extraction or budget-aware selection. The union package makes both statements precise: the numerator is the system's selected store, and the denominator is the best finite package-feasible store after the system's own memories have been added as candidates. The exactly zero A-Mem full-store row is a cost-model diagnostic rather than a coverage bug: at $B=100$, no full serialized A-Mem note fits the budget (mean minimum full-note cost $1768$ words, or $464$ units under the byte-overhead rule), while its compact metadata view remains feasible.
+\Cref{fig:systems} and \Cref{tab:external-denominators} show that \method\ can diagnose heterogeneous memory systems without requiring a common internal representation. The non-oracle Estimated-GVT line is the more realistic package writer: it uses estimated values rather than hidden package-oracle marginals and reaches $0.53,0.68,0.83$ of package OPT across $B=30,60,100$. Letta's core+archival exports achieve the strongest salience-pruned union ratios on the adjudicated subset. Mem0's high upper-pruned bound shows that useful evidence is often extracted, while the gap to salience pruning isolates budget-aware selection as the bottleneck. A-Mem preserves evidence in rich notes, but their serialized size makes them poorly matched to strict small-budget stores unless paired with compaction or admission control.
+
+The denominator comparison makes the union-package point concrete. Mem0's upper-pruned package ratio exceeds one because its exports add coverage not available to the original package candidates; the union denominator is the fairer finite comparison once those memories are admitted as candidate writes. Conversely, scoring only the system's own memories would remove the optimum and obscure whether the bottleneck is extraction or budget-aware selection. The exactly zero A-Mem full-store row is a cost-model diagnostic rather than a coverage bug: at $B=100$, no full serialized A-Mem note fits the budget (mean minimum full-note cost $1768$ words, or $464$ units under the byte-overhead rule), while its compact metadata view remains feasible.
 
 The diagnostic also avoids a common evaluation shortcut. It would be easy to ask each memory system to answer downstream questions and report the final score. That number is useful, but it does not say whether a low score came from writing, retrieval, prompt formatting, model capability, or answer normalization. In \Cref{fig:systems}, the same evidence objective, costs, and budgets are used for all exported stores. This makes the failure mode more actionable: improve extraction if the upper-pruned bound is low; improve admission or compaction if the bound is high but the selected-store ratio is low; improve retrieval/reader behavior only after the written store is known to contain the necessary evidence.
 
 \section{Related Work}\label{sec:related}
 
 \paragraph{Memory systems and benchmarks.}
-MemGPT, Reflexion, MemoryBank, Mem0, and A-Mem propose memory architectures or policies for long-term agents \cite{packer2023memgpt,shinn2023reflexion,zhong2023memorybank,chhikara2025mem0,xu2025amem}. LoCoMo and LongMemEval evaluate long-horizon memory behavior \cite{maharana2024locomo,wu2024longmemeval}. MemSim/MemDaily automatically constructs reliable personal-memory QA data through Bayesian simulation \cite{zhang2024memsim}. \method\ is complementary to these benchmarks: it supplies a finite write-time denominator before retrieval and reader errors are mixed in.
-
-These systems make different architectural commitments: virtual context management, reflection, personalized memory banks, dynamic memory extraction, graph organization, and admission control. \method\ does not require them to share an internal representation. Instead, it asks them to export written memories and then scores those memories under a common package or union denominator. This is why the method is positioned as an evaluation protocol rather than another memory architecture.
+MemGPT, Reflexion, MemoryBank, Mem0, and A-Mem propose memory architectures or policies for long-term agents \cite{packer2023memgpt,shinn2023reflexion,zhong2023memorybank,chhikara2025mem0,xu2025amem}. LoCoMo and LongMemEval evaluate long-horizon memory behavior \cite{maharana2024locomo,wu2024longmemeval}, while MemSim/MemDaily constructs reliable personal-memory QA data through Bayesian simulation \cite{zhang2024memsim}. \method\ is complementary: it scores exported writes under a package or union denominator before retrieval and reader errors are mixed in, without requiring systems to share an internal memory representation.
 
 \paragraph{Retrieval and submodular selection.}
 RAG, MMR, and submodular context selection choose evidence after a query is known \cite{lewis2020rag,carbonell1998mmr,badanidiyuru2014,kumari2024bumblebee}. \method\ instead evaluates persistent write-time memory before future queries are known. Concave-over-modular objectives and knapsack submodular optimization are standard tools \cite{nemhauser1978,sviridenko2004,huang2017knapsack}; we use them to define and certify a benchmarkable semantic surrogate.
 
 \paragraph{Dataset and evaluation protocols.}
-Several long-memory datasets emphasize whether an agent can answer questions after long interaction histories. \method\ targets a different but compatible layer: whether the persistent store contains the evidence needed before the query-time pipeline runs. This is closest in spirit to benchmark designs that expose intermediate artifacts rather than only final predictions. The package artifact is intentionally finite and inspectable. Every ratio should be reproducible from a candidate table, a cost vector, a coverage matrix, evidence weights, and a budget. This design makes the benchmark easier to audit than an end-to-end agent transcript where hidden retrieval or prompt-state changes may affect the outcome.
+Several long-memory datasets emphasize final answers after long histories. \method\ targets a different but compatible layer: whether the persistent store contains the needed evidence before the query-time pipeline runs. Each ratio is reproducible from a candidate table, cost vector, coverage matrix, evidence weights, and budget, making write-time failures auditable rather than hidden inside retrieval or prompt-state changes.
 
 \section{Scope, Limitations, and Artifact}\label{sec:scope}
 
-\method's scores are package-conditional by design: the finite candidate table, cost model, evidence schema, and budget define the evaluated object. This does not replace end-to-end assistant evaluation, but it supplies the missing write-time diagnostic. If a generator omits the right memory, the package optimum measures the best store within that table; if a writer extracts useful memories but fails to retain the right subset, union and upper-pruned scores expose the selection bottleneck. The cost model and one-representation constraint are explicit package parameters; the released sensitivity audit recomputes Natural-87 under a byte-overhead cost and a $k=2$ representation relaxation. The $k=1$ default is a benchmark choice, not a claim that deployed systems must store one representation per experience; allowing $k=2$ changes exact OPT by only $1.3$--$6.0\%$ on Natural-87, so the constraint affects ratios at the percentage-points level rather than changing the qualitative rankings.
+\method's scores are package-conditional by design: the candidate table, cost model, evidence schema, and budget define the evaluated object. This supplies a write-time diagnostic rather than replacing end-to-end assistant evaluation. If a generator omits the right memory, the package optimum measures the best store within that table; if a writer extracts useful memories but fails to retain the right subset, union and upper-pruned scores expose the selection bottleneck. Costs and one-representation groups are explicit package parameters; on Natural-87, byte-overhead costs and a $k=2$ relaxation change ratios at the percentage-points level rather than changing qualitative rankings.
 
-The natural support-sliced package is a conservative first natural instantiation. Model-adjudicated labels provide a scalable construction method with explicit rejection, correction, and audit hooks, and the released human coverage audit shows that the resulting coverage rows are stable under independent human review on the adjudicated subset. Support slices isolate the write-time problem before full-haystack expansion introduces retrieval and session-selection confounds.
-
-The oracle reference writer uses exact coverage marginals, so deployed systems will need estimated utilities, learned candidate generators, model-based annotators, compaction, or native budget-aware admission. \method\ makes those extensions measurable by reporting package ratios, union ratios, and downstream QA metrics side by side. Exact optimization currently targets small and medium packages; larger packages can use decomposition, MILP certificates with gaps, or exact evaluation on sampled slices. The LongMemEval-S transfer study is therefore included as a retrieval/reader diagnostic, not as the primary denominator claim.
-
-The artifact contains exact and stress generators, branch-and-bound and MILP solvers, natural exports, adjudication summaries, public-system scoring scripts, cached API metadata, and figure-generation scripts. Minimal reproduction does not require API calls; API-backed construction is needed only to regenerate natural annotations or rerun public-system exports. We recommend reporting the package schema, cost rule, solver status, oracle ratio, union ratio, and downstream QA metric as separate columns, so write quality, extraction, selection, retrieval, and reader behavior remain auditable.
+Natural-87 is deliberately small, support-sliced, and model-adjudicated, with 13 ambiguous examples rejected from the stricter adjudication pass and human audits used to expose borderline entailment cases. Support slices isolate write-time memory before full-haystack expansion adds retrieval and session-selection confounds. The package-oracle reference writer uses exact coverage marginals; deployed systems need estimated utilities, learned generators, compaction, or native budget-aware admission.
 
 \clearpage
 \bibliographystyle{plain}
@@ -376,7 +391,7 @@ The reader failure audit decomposes the LongMemEval-S focus diagnostic after the
 
 The Natural-200 package is built from support slices rather than full conversation histories. For each example, the candidate-generation stage receives source sessions and emits candidate memories with estimated costs. A separate annotation stage maps evidence units to future-query requirements and scores candidate coverage. We intentionally separate these stages so the writer does not see the query label during memory generation.
 
-The annotation results should be read as model-adjudicated dataset construction with explicit audit hooks. The secondary 50-example audit surfaced ambiguous required-unit cases, which is why the main paper reports the stricter 87-example adjudicated subset for system diagnostics. For the released human coverage audit, two project annotators familiar with the schema independently label all model-positive coverage cells on the 87-example subset plus a stratified 20\% sample of model-zero cells. We compute unweighted Cohen's $\kappa$ on the full stratified audit frame, rather than reweighting to the package's natural positive/negative balance. Human--human disagreements are concentrated in sampled model-zero cells ($116/162$) and in summary/graph-edge/atomic-fact boundaries; human--Gemini disagreements show the same pattern ($81/119$ from sampled zero cells), indicating that the main ambiguity is borderline entailment rather than schema failure. The human-edited seed set validates schema usability and remains in the artifact as prompt/schema development data.
+The annotation results should be read as model-adjudicated dataset construction with explicit audit hooks. The secondary 50-example audit surfaced ambiguous required-unit cases, which is why the main paper reports the stricter 87-example adjudicated subset for system diagnostics. The most common error/ambiguity categories were: required units that were too broad or could be decomposed several ways; summary candidates that implied but did not explicitly state an evidence unit; graph-edge memories whose relation label was plausible but too coarse; temporal or validity updates where current truth depended on ordering; and model-zero cells where humans judged a paraphrase sufficient. For the released human coverage audit, two project annotators familiar with the schema independently label all model-positive coverage cells on the 87-example subset plus a stratified 20\% sample of model-zero cells. We compute unweighted Cohen's $\kappa$ on the full stratified audit frame, rather than reweighting to the package's natural positive/negative balance. Human--human disagreements are concentrated in sampled model-zero cells ($116/162$) and in summary/graph-edge/atomic-fact boundaries; human--Gemini disagreements show the same pattern ($81/119$ from sampled zero cells), indicating that the main ambiguity is borderline entailment rather than schema failure. The human-edited seed set validates schema usability and remains in the artifact as prompt/schema development data.
 
 A Claude Sonnet 4.5 cross-model audit gives a useful boundary on this result. Re-adjudicating the package with Sonnet preserves package-writer rankings exactly at $B=30,60,100$, but produces lower cell-level agreement than Gemini--human (\Cref{tab:coverage-audit}); we therefore treat Sonnet as a prompt/model-sensitivity stress test rather than an independent replacement annotator.
 
@@ -430,12 +445,12 @@ byte-overhead & A-Mem full native & 0.000 \\
 
 \section{LongMemEval Transfer Diagnostics}\label{app:longmemeval}
 
-We also ran a LongMemEval-S retrieval/reader diagnostic. These runs are not oracle ratios because the full benchmark does not provide a finite candidate package with exact coverage rows. They are included to check whether package-style writing can reduce retrieval cost and improve evidence use in a more natural long-memory task.
+We also ran a LongMemEval-S retrieval/reader diagnostic. These runs are not package-oracle ratios because the full benchmark does not provide a finite candidate package with exact coverage rows. They are included to check whether package-style writing can reduce retrieval cost and improve evidence use in a more natural long-memory task.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.96\linewidth]{figures/longmemeval_diagnostics.pdf}
-\caption{LongMemEval-S transfer diagnostics. These are evidence-use and reader diagnostics, not exact oracle-ratio results. Exact-match gains are not the basis of the main claim.}
+\caption{LongMemEval-S transfer diagnostics. These are evidence-use and reader diagnostics, not exact package-oracle ratio results. Exact-match gains are not the basis of the main claim.}
 \label{fig:longmemeval}
 \end{figure}
 
@@ -445,7 +460,7 @@ The useful signal is narrower than end-to-end QA superiority. The \method-style 
 
 {\raggedright
 The artifact contains deterministic exact-package runs, natural package exports, model-adjudication reports, and public-system scoring scripts. The safest reproduction path is to run the exact-small suite against certified OPT, audit a random subset with the MILP solver, re-score the 87-example adjudicated natural subset under package and union denominators, and recompute the public-system pruning diagnostics from exported Mem0, A-Mem, and Letta stores.
-API-backed natural package construction caches prompts, completions, token counts, model versions, and adjudication decisions. Natural package candidate generation used OpenRouter with \texttt{google/gemini-3.1-flash-lite-preview}, temperature $0$, JSON response format, and a default 1400-token completion cap. Exported-system coverage/salience adjudication used cached Gemini Flash/Flash-Lite calls with temperature $0$ and JSON response format; the Letta coverage and salience caps were 1800 and 4000 tokens respectively, while the Mem0 writer configuration used temperature $0$ and a 700-token cap. The cross-model stress audit used OpenRouter \texttt{anthropic/claude-sonnet-4.5} with temperature $0$, JSON response format, cached package-level adjudications, and a separate cached 1{,}975-cell binary coverage pass. All cached calls include prompt hashes and token/cost metadata. The exact oracle denominator itself is deterministic once a package has been constructed.
+API-backed natural package construction caches prompts, completions, token counts, model versions, and adjudication decisions. Natural package candidate generation used OpenRouter with \texttt{google/gemini-3.1-flash-lite-preview}, temperature $0$, JSON response format, and a default 1400-token completion cap. Exported-system coverage/salience adjudication used cached Gemini Flash/Flash-Lite calls with temperature $0$ and JSON response format; the Letta coverage and salience caps were 1800 and 4000 tokens respectively, while the Mem0 writer configuration used temperature $0$ and a 700-token cap. The cross-model stress audit used OpenRouter \texttt{anthropic/claude-sonnet-4.5} with temperature $0$, JSON response format, cached package-level adjudications, and a separate cached 1{,}975-cell binary coverage pass. All cached calls include prompt hashes and token/cost metadata. The exact package-oracle denominator itself is deterministic once a package has been constructed.
 \par}
 
 \clearpage

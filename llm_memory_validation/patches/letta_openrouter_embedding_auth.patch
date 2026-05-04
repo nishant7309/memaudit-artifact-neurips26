@@ -1,0 +1,21 @@
+diff --git a/letta/llm_api/openai_client.py b/letta/llm_api/openai_client.py
+--- a/letta/llm_api/openai_client.py
++++ b/letta/llm_api/openai_client.py
+@@
+     def _prepare_client_kwargs_embedding(self, embedding_config: EmbeddingConfig) -> dict:
+         api_key = model_settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
++        is_openrouter = embedding_config.embedding_endpoint and "openrouter.ai" in embedding_config.embedding_endpoint
++        if is_openrouter:
++            api_key = model_settings.openrouter_api_key or os.environ.get("OPENROUTER_API_KEY") or api_key
+         # supposedly the openai python client requires a dummy API key
+         api_key = api_key or "DUMMY_API_KEY"
+         kwargs = {"api_key": api_key, "base_url": embedding_config.embedding_endpoint}
++        if is_openrouter:
++            headers = {}
++            if model_settings.openrouter_referer:
++                headers["HTTP-Referer"] = model_settings.openrouter_referer
++            if model_settings.openrouter_title:
++                headers["X-Title"] = model_settings.openrouter_title
++            if headers:
++                kwargs["default_headers"] = headers
+         return kwargs

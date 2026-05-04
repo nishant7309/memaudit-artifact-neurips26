@@ -1,0 +1,35 @@
+\section*{NeurIPS Paper Checklist}
+
+\begin{enumerate}[leftmargin=1.5em,itemsep=4pt]
+\item \textbf{Claims.} \answerYes{} The abstract and introduction state that \method\ is an exact-oracle evaluation protocol for finite memory-writing packages, not a deployed memory architecture. The scope and package-conditional nature are discussed in \Cref{sec:scope}.
+
+\item \textbf{Limitations.} \answerYes{} \Cref{sec:scope} gives a separate scope and limitations section covering package-conditional optima, model-adjudicated natural labels, support-sliced natural packages, exact-solver scale, and downstream QA diagnostics.
+
+\item \textbf{Theory, assumptions, and proofs.} \answerYes{} Assumptions for the semantic coverage theorem and scoped oracle-\compiler\ guarantee are stated in \Cref{sec:package,sec:oracles}; complete proofs are provided in \Cref{app:proofs}.
+
+\item \textbf{Experimental result reproducibility.} \answerYes{} The artifact includes deterministic package generators, exact solvers, cached package artifacts, result summaries, and rerun commands. Minimal reproduction does not require API calls; API-backed reconstruction is documented separately.
+
+\item \textbf{Open access to data and code.} \answerYes{} The anonymized submission includes code, package data, Croissant metadata, and documentation for reproducing the main exact-package and exported-system diagnostics.
+
+\item \textbf{Experimental setting/details.} \answerYes{} \Cref{sec:controlled,sec:validity,sec:natural,app:details} describe the package distributions, budgets, candidate families, adjudication path, exact solvers, and exported-system scoring setup.
+
+\item \textbf{Experiment statistical significance.} \answerYes{} The controlled exact sweep reports bootstrap 95\% confidence intervals over the canonical 500-seed run. Natural and exported-system package rows are reported as deterministic diagnostics on the adjudicated subset.
+
+\item \textbf{Experiments compute resources.} \answerYes{} \Cref{sec:scope} and the artifact documentation state that exact-small and cached natural re-scoring run on CPU without API calls. API-backed natural annotation and external memory exports require OpenRouter-compatible API access and cached model/version metadata.
+
+\item \textbf{Code of ethics.} \answerYes{} The work is an evaluation artifact for memory-writing systems. The release is anonymized for review and excludes API keys, private review notes, and local environment files.
+
+\item \textbf{Broader impacts.} \answerYes{} The main risk is that memory benchmarks can incentivize storing sensitive or stale personal information. \Cref{sec:validity,sec:scope} discuss validity-state memories, abstention/deletion units, and auditability as mitigation-oriented design choices.
+
+\item \textbf{Safeguards.} \answerNA{} The paper does not release a pretrained model or high-risk generative model. The artifact releases package schemas, generators, scoring code, and cached benchmark data.
+
+\item \textbf{Licenses.} \answerYes{} The paper cites external systems and datasets used for comparison. The artifact documentation includes dependency and asset manifests; external repository checkouts are not bundled in the anonymized artifact.
+
+\item \textbf{Assets.} \answerYes{} The submission includes a dataset/evaluation artifact with README, reproducibility instructions, evaluation card, artifact manifest, Croissant metadata, and documented intended/not-intended uses.
+
+\item \textbf{Crowdsourcing and research with human subjects.} \answerNA{} No paid crowd workers or human-subject experiments are used. The human-edited seed package consists of fictional examples edited for schema validation and does not include participant data.
+
+\item \textbf{IRB approvals.} \answerNA{} The released examples are synthetic, model-adjudicated support slices, or fictional human-edited seed examples. No identifiable participant data or human-subject intervention is released.
+
+\item \textbf{Declaration of LLM usage.} \answerYes{} LLMs are used for natural support-slice package construction, adjudication, external memory-system exports, and reader diagnostics; these uses are described in \Cref{sec:natural,sec:scope,app:details,app:longmemeval}.
+\end{enumerate}

@@ -1,0 +1,10 @@
+{"artifact_path": "oraclemem_runs/exact_500", "artifact_type": "controlled_exact_packages", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "oraclemem_runs/validity_500", "artifact_type": "validity_stress_packages", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_gemini_flash", "artifact_type": "natural_support_slices", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_gemini_flash/sensitivity", "artifact_type": "sensitivity_audit", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_gemini_flash/human_coverage_audit", "artifact_type": "human_coverage_audit", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_claude_sonnet45/cross_model_check", "artifact_type": "cross_model_stress_audit", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_claude_sonnet45/cell_coverage_audit", "artifact_type": "cross_model_cell_audit", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/mem0_rescore_adjudicated100_gemini_flash", "artifact_type": "exported_system_diagnostics", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "llm_memory_validation/natural_adjudicated_100_gemini_flash/actual_letta_openrouter_gemini_passage_87", "artifact_type": "exported_system_diagnostics", "budget": null, "objective_value": null, "ratio": null}
+{"artifact_path": "README_REPO.md", "artifact_type": "documentation", "budget": null, "objective_value": null, "ratio": null}
